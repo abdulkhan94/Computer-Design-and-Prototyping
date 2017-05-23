@@ -1,0 +1,206 @@
+/*
+  Eric Villasenor
+  evillase@gmail.com
+
+  datapath contains register file, control, hazard,
+  muxes, and glue logic for processor
+*/
+
+// data path interface
+`include "datapath_cache_if.vh"
+`include "cpu_types_pkg.vh"
+`include "control_unit_if.vh"
+`include "pc_if.vh"
+`include "alu_if.vh"
+`include "register_file_if.vh"
+`include "request_unit_if.vh"
+
+// alu op, mips op, and instruction type
+`include "cpu_types_pkg.vh"
+
+module datapath (
+  input logic CLK, nRST,
+  datapath_cache_if.dp dpif
+);
+   
+  // import types
+  import cpu_types_pkg::*;
+
+  // pc init
+  parameter PC_INIT = 0;
+
+  //Initializations
+  control_unit_if cuif();
+  register_file_if rfif();
+  alu_if aluif();
+  pc_if pcif();
+  request_unit_if ruif();
+  
+
+   
+  request_unit RU(CLK, nRST, ruif);
+  alu ALU(aluif);
+  pc PC(CLK, nRST, pcif.progc);
+  register_file RF(CLK, nRST, rfif);
+  control_unit CU(CLK, nRST, cuif);
+
+  word_t extended_value;
+  word_t shamt_value;
+  word_t lui_value;
+  word_t pcn;
+   
+   
+  //Account for LUI
+  assign lui_value = {dpif.imemload[15:0], 16'b0000000000000000};
+
+  //Account for shamt 
+  assign shamt_value = {27'b000000000000000000000000000, dpif.imemload[10:6]};
+
+  //Account for extender flag:
+  //Zero extension - extender = 0 ; sign extension - extender = 1;
+  always_comb begin
+	if(cuif.extender == 1'b0) begin
+		extended_value = {16'b0000000000000000, dpif.imemload[15:0]};
+	end 
+	else begin//else if (cuif.extender == 1'b1) begin
+		if(dpif.imemload[15]) begin		
+			extended_value = {16'b1111111111111111, dpif.imemload[15:0]};
+		end 
+		else begin
+			extended_value = {16'b0000000000000000, dpif.imemload[15:0]};
+		end
+	end
+  end
+
+  //ALU mapping
+  assign aluif.portA = rfif.rdat1;
+  
+  assign aluif.aluop = cuif.ALUOp;
+
+  //For ALU port B 
+  always_comb begin
+	aluif.portB = rfif.rdat2;
+  	if(cuif.ALUSrc) begin
+		aluif.portB = extended_value;
+	end
+	 if (cuif.shamt) begin
+       		aluif.portB = shamt_value; //NOT SURE ABOUT THIS ONE
+	 end
+		/*else if (cuif.op == LUI) begin //Incorrect, should be signal into wdat
+			aluif.portB = lui_value;
+		end*/
+	//end
+	//end
+/*	else begin
+		aluif.portB = rfif.rdat2;
+	end*/
+  end
+
+  //Request Unit mapping
+  assign ruif.dhit = dpif.dhit;
+  assign ruif.ihit = dpif.ihit;
+  assign ruif.halt = cuif.halt;
+  assign ruif.dWEN = cuif.dWEN;
+  assign ruif.dREN = cuif.dREN;
+
+
+  //Datapath mapping
+  always_ff @ (posedge CLK, negedge nRST) begin
+        if(!nRST) begin
+		dpif.halt <= 1'b0;
+	end
+	else begin
+  		dpif.halt <= cuif.halt;
+  	end
+  end
+  assign dpif.imemREN = 1; //NOT SURE
+  assign dpif.imemaddr =pcif.pc_curr;
+ // pcif.pc_curr;
+  assign dpif.dmemREN = ruif.dmemREN;
+  assign dpif.dmemWEN = ruif.dmemWEN;
+  assign dpif.dmemstore = rfif.rdat2;
+  assign dpif.dmemaddr = aluif.outport;
+  
+
+  //Register file mapping
+  //For rfif.WEN
+  assign rfif.WEN = cuif.RegWrite & (dpif.dhit | dpif.ihit);
+  //For rfif.wsel
+  always_comb begin
+	if((cuif.op != JAL) && (cuif.RegDst == 1)) begin
+		rfif.wsel = dpif.imemload[15:11]; //rd
+	end
+	else if((cuif.op == JAL) && (cuif.RegDst == 1)) begin
+		rfif.wsel = 32'd31;
+	end
+	else begin
+		rfif.wsel = dpif.imemload[20:16]; //rt
+	end
+  end
+  
+  assign rfif.rsel1 = dpif.imemload[25:21]; //rs
+  assign rfif.rsel2 = dpif.imemload[20:16]; //rt
+  
+  //For rfif.wdat
+  always_comb begin
+	if((cuif.op != JAL) && (cuif.MemToReg == 1)) begin
+		rfif.wdat = dpif.dmemload;		
+	end
+	else if(cuif.op == JAL) begin
+		rfif.wdat = pcif.pc_curr+4;//31; //NOT SURE ABOUT THIS ONE
+	end
+	else if(cuif.op == LUI) begin
+		rfif.wdat = lui_value; //New stuff
+	end
+	else begin
+		rfif.wdat = aluif.outport;
+	end
+  end
+  
+  
+
+  //Program Counter mapping 
+  assign pcif.pc_en = ruif.pc_en;
+  
+  assign pcif.pc_next = pcn; 
+     //pcif.pc_curr = pcn;
+  
+   //assign pcn = 32'b0;
+   
+  word_t pc_inc;
+  always_comb begin
+        pcn = 32'b0;
+        pc_inc = pcif.pc_curr + 4;
+	if(cuif.Jump == 2'b00) begin
+		if((cuif.op == BEQ) && (aluif.zero_flag) && (cuif.Branch == 1)) begin
+			pcn = ({{14{dpif.imemload[15]}}, dpif.imemload[15:0], 2'b00}+pc_inc);
+		end
+		else if ((cuif.op == BNE) && ~(aluif.zero_flag) && (cuif.Branch == 1)) begin
+			pcn = ({{14{dpif.imemload[15]}}, dpif.imemload[15:0], 2'b00}+pc_inc);
+		end
+		else begin
+			pcn = pcif.pc_curr + 4;
+		end
+	end
+	else if(cuif.Jump == 2'b01) begin
+		pcn = rfif.rdat1; //Jump routine
+	end
+/*	else if(cuif.Jump == 2'b10) begin
+		pcn = {dpif.imemaddr[31:28], dpif.imemload[25:0], 2'b00}; //Jump
+	end*/
+	else if(cuif.Jump == 2'b11) begin //NOT SURE ABOUT THIS ONE
+		pcn = pc_inc;
+		pcn = {pcif.pc_curr[31:28], dpif.imemload[25:0], 2'b00}; //Jump and Link
+	end
+        else begin
+		pcn = pc_inc;
+	        pcn = {pcif.pc_curr[31:28], dpif.imemload[25:0], 2'b00};
+	end
+	  
+  end
+ 
+  //Control Unit mapping
+  assign cuif.rfunc = funct_t'(dpif.imemload[5:0]);
+  assign cuif.op = opcode_t'(dpif.imemload[31:26]);
+  
+endmodule

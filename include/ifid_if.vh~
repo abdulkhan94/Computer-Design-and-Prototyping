@@ -1,0 +1,21 @@
+`ifndef IFID_IF_VH
+`define IFID_IF_VH
+`include "cpu_types_pkg.vh"
+
+interface ifid_if;
+  import cpu_types_pkg::*;
+
+  //Inputs from Instruction & Program Counter
+  word_t instr_in; 
+  word_t pc_next_in;
+
+  //Outputs
+  word_t instr_out;
+  word_t pc_next_out;
+
+  modport ifx(
+    input instr_in, pc_next_in,
+    output instr_out, pc_next_out);
+
+endinterface
+`endif

@@ -1,0 +1,191 @@
+	[00000000] <-- 341DFFFC
+	[00000004] <-- 34050003
+	[00000008] <-- 34060004
+	[0000000C] <-- 34070000
+	[00000010] <-- 27BDFFFC
+	[00000014] <-- AFA50000
+	[00000018] <-- 27BDFFFC
+	[0000001C] <-- AFA60000
+	[00000020] <-- 00E53820
+	[00000024] <-- 20C6FFFF
+	[00000028] <-- 14C0FFFD
+	[0000002C] <-- 27BDFFFC
+	[00000030] <-- AFA70000
+	[00000034] <-- FFFFFFFF
+14 words loaded from meminit.hex
+Starting simulation...
+
+	Core 1
+	PC <-- 00000000
+
+00000000(Core 1): 
+	I$ MISS: I$[0].tag <-- 0x0
+	341DFFFC ORI R29, R0, 65532
+	PC <-- 00000004
+	R29 <-- 0000FFFC
+
+00000004(Core 1): 
+	I$ MISS: I$[1].tag <-- 0x0
+	34050003 ORI R5, R0, 3
+	PC <-- 00000008
+	R5 <-- 00000003
+
+00000008(Core 1): 
+	I$ MISS: I$[2].tag <-- 0x0
+	34060004 ORI R6, R0, 4
+	PC <-- 0000000C
+	R6 <-- 00000004
+
+0000000C(Core 1): 
+	I$ MISS: I$[3].tag <-- 0x0
+	34070000 ORI R7, R0, 0
+	PC <-- 00000010
+	R7 <-- 00000000
+
+00000010(Core 1): 
+	I$ MISS: I$[4].tag <-- 0x0
+	27BDFFFC ADDIU R29, R29, -4
+	PC <-- 00000014
+	R29 <-- 0000FFF8
+
+00000014(Core 1): 
+	I$ MISS: I$[5].tag <-- 0x0
+	AFA50000 SW R5, 0(R29)
+	PC <-- 00000018
+	D$ MISS: D$[7][0].tag <-- 0x3FF (0)
+	[0000FFF8] <-- 00000003
+
+00000018(Core 1): 
+	I$ MISS: I$[6].tag <-- 0x0
+	27BDFFFC ADDIU R29, R29, -4
+	PC <-- 0000001C
+	R29 <-- 0000FFF4
+
+0000001C(Core 1): 
+	I$ MISS: I$[7].tag <-- 0x0
+	AFA60000 SW R6, 0(R29)
+	PC <-- 00000020
+	D$ MISS: D$[6][0].tag <-- 0x3FF (0)
+	[0000FFF4] <-- 00000004
+
+00000020(Core 1): 
+	I$ MISS: I$[8].tag <-- 0x0
+	00E53820 ADD R7, R7, R5
+	PC <-- 00000024
+	R7 <-- 00000003
+
+00000024(Core 1): 
+	I$ MISS: I$[9].tag <-- 0x0
+	20C6FFFF ADDI R6, R6, -1
+	PC <-- 00000028
+	R6 <-- 00000003
+
+00000028(Core 1): 
+	I$ MISS: I$[10].tag <-- 0x0
+	14C0FFFD BNE R6, R0, 32
+	PC <-- 00000020
+
+00000020(Core 1): 
+	I$[8] HIT with Tag = 0x0
+	00E53820 ADD R7, R7, R5
+	PC <-- 00000024
+	R7 <-- 00000006
+
+00000024(Core 1): 
+	I$[9] HIT with Tag = 0x0
+	20C6FFFF ADDI R6, R6, -1
+	PC <-- 00000028
+	R6 <-- 00000002
+
+00000028(Core 1): 
+	I$[10] HIT with Tag = 0x0
+	14C0FFFD BNE R6, R0, 32
+	PC <-- 00000020
+
+00000020(Core 1): 
+	I$[8] HIT with Tag = 0x0
+	00E53820 ADD R7, R7, R5
+	PC <-- 00000024
+	R7 <-- 00000009
+
+00000024(Core 1): 
+	I$[9] HIT with Tag = 0x0
+	20C6FFFF ADDI R6, R6, -1
+	PC <-- 00000028
+	R6 <-- 00000001
+
+00000028(Core 1): 
+	I$[10] HIT with Tag = 0x0
+	14C0FFFD BNE R6, R0, 32
+	PC <-- 00000020
+
+00000020(Core 1): 
+	I$[8] HIT with Tag = 0x0
+	00E53820 ADD R7, R7, R5
+	PC <-- 00000024
+	R7 <-- 0000000C
+
+00000024(Core 1): 
+	I$[9] HIT with Tag = 0x0
+	20C6FFFF ADDI R6, R6, -1
+	PC <-- 00000028
+	R6 <-- 00000000
+
+00000028(Core 1): 
+	I$[10] HIT with Tag = 0x0
+	14C0FFFD BNE R6, R0, 32
+	PC <-- 0000002C
+
+0000002C(Core 1): 
+	I$ MISS: I$[11].tag <-- 0x0
+	27BDFFFC ADDIU R29, R29, -4
+	PC <-- 00000030
+	R29 <-- 0000FFF0
+
+00000030(Core 1): 
+	I$ MISS: I$[12].tag <-- 0x0
+	AFA70000 SW R7, 0(R29)
+	PC <-- 00000034
+	D$[6][0] HIT with Tag = 0x3FF (1)
+	[0000FFF0] <-- 0000000C
+
+00000034(Core 1): 
+	I$ MISS: I$[13].tag <-- 0x0
+	FFFFFFFF HALT
+	PC <-- 00000038
+HALT executed(Core 1).
+Hit count stored to memory
+	[00003100] <-- 00000001
+Done simulating...
+
+Instruction Breakdown:
+
+	  BNE:    4 (17.39%)
+	 ADDI:    4 (17.39%)
+	 ADDIU:    3 (13.04%)
+	  ORI:    4 (17.39%)
+	   SW:    3 (13.04%)
+	 HALT:    1 (4.35%)
+	  ADD:    4 (17.39%)
+	 TOTAL:   23
+
+	PC: 00000038
+
+ICache:
+	 Accesses:	23
+	 Hits:		9
+	 Hit Rate:	39%
+DCache:
+	 Accesses:	3
+	 Hits:		1
+	 Hit Rate:	33%
+
+General Purpose Registers:
+	R 0: 00000000	R 1: 00000000	R 2: 00000000	R 3: 00000000
+	R 4: 00000000	R 5: 00000003	R 6: 00000000	R 7: 0000000C
+	R 8: 00000000	R 9: 00000000	R10: 00000000	R11: 00000000
+	R12: 00000000	R13: 00000000	R14: 00000000	R15: 00000000
+	R16: 00000000	R17: 00000000	R18: 00000000	R19: 00000000
+	R20: 00000000	R21: 00000000	R22: 00000000	R23: 00000000
+	R24: 00000000	R25: 00000000	R26: 00000000	R27: 00000000
+	R28: 00000000	R29: 0000FFF0	R30: 00000000	R31: 00000000

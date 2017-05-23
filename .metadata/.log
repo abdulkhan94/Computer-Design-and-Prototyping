@@ -1,0 +1,13 @@
+!SESSION 2017-03-23 00:57:57.980 -----------------------------------------------
+eclipse.buildId=M20100909-0800
+java.version=1.7.0_131
+java.vendor=Oracle Corporation
+BootLoader constants: OS=linux, ARCH=x86_64, WS=gtk, NL=en_US
+Command-line arguments:  -os linux -ws gtk -arch x86_64
+
+!ENTRY org.eclipse.equinox.p2.engine 4 4 2017-03-23 00:58:03.810
+!MESSAGE An error occurred while installing the items
+!SUBENTRY 1 org.eclipse.equinox.p2.engine 4 0 2017-03-23 00:58:03.810
+!MESSAGE session context was:(profile=PlatformProfile, phase=org.eclipse.equinox.internal.p2.engine.phases.Install, operand=null --> [R]org.eclipse.equinox.initializer 1.0.0.v20100503, action=org.eclipse.equinox.internal.p2.touchpoint.eclipse.actions.InstallBundleAction).
+!SUBENTRY 1 org.eclipse.equinox.p2.touchpoint.eclipse 4 0 2017-03-23 00:58:03.810
+!MESSAGE The artifact file for osgi.bundle,org.eclipse.equinox.initializer,1.0.0.v20100503 was not found.
